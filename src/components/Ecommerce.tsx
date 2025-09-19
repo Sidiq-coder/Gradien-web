@@ -81,7 +81,8 @@ export function Ecommerce() {
   ];
 
   const handleViewAllProducts = () => {
-    window.location.href = '/shop';
+    // This will navigate to the full e-commerce page
+    window.open('/shop', '_blank');
   };
 
   return (
@@ -139,7 +140,6 @@ export function Ecommerce() {
                   </div>
                 </div>
                 <motion.button
-                  onClick={() => (window.location.href = '/shop')}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors inline-flex items-center"

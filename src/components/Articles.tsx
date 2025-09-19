@@ -84,7 +84,8 @@ export function Articles() {
   ];
 
   const handleViewAllArticles = () => {
-    window.location.href = '/articles';
+    // This will navigate to the full articles page
+    window.open('/articles', '_blank');
   };
 
   return (

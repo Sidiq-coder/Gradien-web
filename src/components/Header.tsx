@@ -1,11 +1,25 @@
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from './ui/dropdown-menu';
 import gradienLogo from 'figma:asset/ae495aabe004ee9e291840853315a29e5347ac5a.png';
 
-export function Header() {
+interface HeaderProps {
+  currentPage?: string;
+  onNavigate?: (page: 'home' | 'login' | 'register' | 'dashboard' | 'articles' | 'shop') => void;
+}
+
+export function Header({ currentPage = 'home', onNavigate }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const navItems = [
     { label: 'Beranda', href: '#hero' },
@@ -18,15 +32,9 @@ export function Header() {
   ];
 
   const smoothScrollTo = (elementId: string) => {
-    const isHome = window.location.pathname === '/' || window.location.pathname === '';
-    if (!isHome) {
-      // Navigate to home with hash so browser scrolls to the section
-      window.location.href = `/${elementId}`; // elementId already includes leading '#'
-      return;
-    }
     const element = document.querySelector(elementId);
     if (element) {
-      const headerHeight = 80; // Approximate header height
+      const headerHeight = 80;
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - headerHeight;
 
@@ -40,7 +48,44 @@ export function Header() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    smoothScrollTo(href);
+    if (currentPage !== 'home' && onNavigate) {
+      onNavigate('home');
+      // Delay scroll to allow page transition
+      setTimeout(() => smoothScrollTo(href), 100);
+    } else {
+      smoothScrollTo(href);
+    }
+  };
+
+  const handleLogoClick = () => {
+    if (onNavigate) {
+      onNavigate('home');
+    }
+  };
+
+  const handleLogin = () => {
+    if (onNavigate) {
+      onNavigate('login');
+    }
+  };
+
+  const handleRegister = () => {
+    if (onNavigate) {
+      onNavigate('register');
+    }
+  };
+
+  const handleDashboard = () => {
+    if (onNavigate) {
+      onNavigate('dashboard');
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    if (onNavigate) {
+      onNavigate('home');
+    }
   };
 
   return (
@@ -58,7 +103,7 @@ export function Header() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group min-w-0"
-            onClick={(e) => handleNavClick(e as any, '#hero')}
+            onClick={handleLogoClick}
           >
             <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
@@ -79,7 +124,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6">
-            {navItems.map((item, index) => (
+            {currentPage === 'home' && navItems.map((item, index) => (
               <motion.a
                 key={item.label}
                 href={item.href}
@@ -98,38 +143,121 @@ export function Header() {
                 ></motion.span>
               </motion.a>
             ))}
+            
+            {/* Authentication Section */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8 }}
+              className="flex items-center space-x-3"
             >
-              <Button size="sm" className="bg-[#0d7377] hover:bg-[#0a5d61] text-white text-sm xl:text-base px-4 xl:px-6">
-                Bergabung
-              </Button>
+              {user ? (
+                <>
+                  {/* Dashboard Button */}
+                  <Button 
+                    variant="outline"
+                    size="sm" 
+                    onClick={handleDashboard}
+                    className="border-[#0d7377] text-[#0d7377] hover:bg-[#e6f7f7] text-sm xl:text-base px-4 xl:px-6"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  
+                  {/* User Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                        <User className="w-4 h-4" />
+                        <span className="hidden xl:inline">{user.name}</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={handleDashboard}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline"
+                    size="sm" 
+                    onClick={handleLogin}
+                    className="border-[#0d7377] text-[#0d7377] hover:bg-[#e6f7f7] text-sm xl:text-base px-4 xl:px-6"
+                  >
+                    Masuk
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleRegister}
+                    className="bg-[#0d7377] hover:bg-[#0a5d61] text-white text-sm xl:text-base px-4 xl:px-6"
+                  >
+                    Daftar
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </nav>
 
           {/* Tablet Navigation */}
           <nav className="hidden md:flex lg:hidden items-center space-x-3">
-            <select 
-              className="bg-transparent border border-gray-300 rounded-lg px-3 py-1 text-sm text-gray-700 focus:outline-none focus:border-[#0d7377]"
-              onChange={(e) => {
-                if (e.target.value) {
-                  smoothScrollTo(e.target.value);
-                  e.target.value = '';
-                }
-              }}
-            >
-              <option value="">Menu</option>
-              {navItems.map((item) => (
-                <option key={item.label} value={item.href}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-            <Button size="sm" className="bg-[#0d7377] hover:bg-[#0a5d61] text-white text-sm">
-              Bergabung
-            </Button>
+            {currentPage === 'home' && (
+              <select 
+                className="bg-transparent border border-gray-300 rounded-lg px-3 py-1 text-sm text-gray-700 focus:outline-none focus:border-[#0d7377]"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const event = { preventDefault: () => {} } as React.MouseEvent<HTMLAnchorElement>;
+                    handleNavClick(event, e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+              >
+                <option value="">Menu</option>
+                {navItems.map((item) => (
+                  <option key={item.label} value={item.href}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            )}
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <User className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleDashboard}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" onClick={handleLogin}>
+                  Masuk
+                </Button>
+                <Button size="sm" onClick={handleRegister} className="bg-[#0d7377] hover:bg-[#0a5d61] text-white">
+                  Daftar
+                </Button>
+              </div>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -155,7 +283,7 @@ export function Header() {
             className="md:hidden py-3 border-t"
           >
             <div className="space-y-1">
-              {navItems.map((item, index) => (
+              {currentPage === 'home' && navItems.map((item, index) => (
                 <motion.a
                   key={item.label}
                   href={item.href}
@@ -169,15 +297,52 @@ export function Header() {
                 </motion.a>
               ))}
             </div>
+            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="pt-3 mt-3 border-t"
             >
-              <Button className="w-full bg-[#0d7377] hover:bg-[#0a5d61] text-white">
-                Bergabung
-              </Button>
+              {user ? (
+                <div className="space-y-2">
+                  <div className="px-4 py-2 text-sm text-gray-600">
+                    Selamat datang, {user.name}
+                  </div>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start" 
+                    onClick={handleDashboard}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50" 
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline"
+                    className="w-full" 
+                    onClick={handleLogin}
+                  >
+                    Masuk
+                  </Button>
+                  <Button 
+                    className="w-full bg-[#0d7377] hover:bg-[#0a5d61] text-white" 
+                    onClick={handleRegister}
+                  >
+                    Daftar
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </motion.nav>
         )}

@@ -1,30 +1,25 @@
 import { motion } from 'motion/react';
+import { ArrowLeft, ShoppingCart, Star, Search, Filter, Grid, List, Heart } from 'lucide-react';
 import { useState } from 'react';
-import { Search, Filter, ShoppingCart, Heart, Star, Grid, List } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
 
-export function ShopPage() {
+interface ShopPageProps {
+  onNavigate: (page: 'home' | 'login' | 'register' | 'dashboard' | 'articles' | 'shop') => void;
+}
+
+export function ShopPage({ onNavigate }: ShopPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const categories = ['All', 'Apparel', 'Accessories', 'Digital Products', 'Stationery'];
-  const sortOptions = [
-    { value: 'newest', label: 'Terbaru' },
-    { value: 'price-low', label: 'Harga Terendah' },
-    { value: 'price-high', label: 'Harga Tertinggi' },
-    { value: 'rating', label: 'Rating Tertinggi' },
-    { value: 'popular', label: 'Terpopuler' }
-  ];
-
-  const products = [
+  const allProducts = [
     {
       id: 1,
       name: "TechMahasiswa Premium Hoodie",
@@ -35,9 +30,7 @@ export function ShopPage() {
       reviews: 124,
       badge: "Best Seller",
       category: "Apparel",
-      description: "Hoodie premium dengan material cotton blend yang nyaman dan berkualitas tinggi.",
-      inStock: true,
-      discount: 25
+      description: "Hoodie berkualitas premium dengan design eksklusif Gradien Unila. Material cotton combed 30s yang nyaman dan tahan lama."
     },
     {
       id: 2,
@@ -49,9 +42,7 @@ export function ShopPage() {
       reviews: 89,
       badge: "Bundle Deal",
       category: "Accessories",
-      description: "Paket lengkap untuk coding: mouse pad, sticker, dan aksesoris lainnya.",
-      inStock: true,
-      discount: 25
+      description: "Paket lengkap aksesoris untuk developer: mouse pad, sticker pack, notebook, dan pen eksklusif Gradien Unila."
     },
     {
       id: 3,
@@ -62,394 +53,414 @@ export function ShopPage() {
       rating: 4.7,
       reviews: 156,
       badge: "Hot Item",
-      category: "Digital Products",
-      description: "Koleksi digital tools dan resources untuk developer profesional.",
-      inStock: true,
-      discount: 31
+      category: "Digital",
+      description: "Koleksi digital tools, templates, dan resources premium untuk mempercepat workflow development Anda."
     },
     {
       id: 4,
-      name: "TechMahasiswa T-Shirt",
-      price: 149000,
-      originalPrice: 179000,
+      name: "Gradien Unila T-Shirt",
+      price: 159000,
+      originalPrice: 199000,
       image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
       rating: 4.6,
-      reviews: 67,
+      reviews: 78,
       badge: "New",
       category: "Apparel",
-      description: "T-shirt dengan design eksklusif TechMahasiswa, material cotton combed 30s.",
-      inStock: true,
-      discount: 17
+      description: "T-shirt casual dengan logo Gradien Unila. Material katun premium yang breathable dan nyaman dipakai sehari-hari."
     },
     {
       id: 5,
       name: "Programming Notebook Set",
-      price: 79000,
-      originalPrice: 99000,
+      price: 89000,
+      originalPrice: 120000,
       image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop",
       rating: 4.5,
-      reviews: 43,
+      reviews: 92,
       badge: "Limited",
       category: "Stationery",
-      description: "Set notebook khusus untuk coding dan planning project.",
-      inStock: true,
-      discount: 20
+      description: "Set notebook khusus programmer dengan template untuk algoritma, flowchart, dan note-taking yang terstruktur."
     },
     {
       id: 6,
-      name: "Tech Sticker Pack",
-      price: 35000,
-      originalPrice: 45000,
-      image: "https://images.unsplash.com/photo-1558618047-dd6c0e41cde0?w=400&h=400&fit=crop",
-      rating: 4.4,
-      reviews: 89,
-      badge: "Popular",
+      name: "Gradien Totebag Canvas",
+      price: 129000,
+      originalPrice: 169000,
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
+      rating: 4.7,
+      reviews: 45,
+      badge: "Eco-Friendly",
       category: "Accessories",
-      description: "Koleksi sticker tech companies dan programming languages.",
-      inStock: true,
-      discount: 22
+      description: "Totebag canvas berkualitas tinggi dengan design minimalis Gradien Unila. Perfect untuk kampus atau daily activities."
     },
     {
       id: 7,
-      name: "Full Stack Course Bundle",
-      price: 199000,
-      originalPrice: 299000,
-      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=400&fit=crop",
+      name: "Sticker Pack Gradien",
+      price: 25000,
+      originalPrice: 35000,
+      image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=400&fit=crop",
       rating: 4.9,
-      reviews: 234,
-      badge: "Best Value",
-      category: "Digital Products",
-      description: "Kursus lengkap Full Stack Development dengan mentor berpengalaman.",
-      inStock: true,
-      discount: 33
+      reviews: 203,
+      badge: "Popular",
+      category: "Accessories",
+      description: "Paket sticker waterproof dengan berbagai design tech-themed dan logo Gradien Unila untuk laptop dan gadget."
     },
     {
       id: 8,
-      name: "Premium Mouse Pad",
-      price: 89000,
-      originalPrice: 109000,
-      image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop",
-      rating: 4.3,
-      reviews: 56,
-      badge: "Quality",
-      category: "Accessories",
-      description: "Mouse pad dengan surface premium untuk gaming dan productivity.",
-      inStock: false,
-      discount: 18
+      name: "Tech Learning Course Bundle",
+      price: 299000,
+      originalPrice: 499000,
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=400&fit=crop",
+      rating: 4.8,
+      reviews: 167,
+      badge: "Course",
+      category: "Digital",
+      description: "Bundle kursus online lengkap: Web Development, Mobile App, dan Data Science dengan mentor berpengalaman."
     }
   ];
 
-  const filteredProducts = products.filter(product => {
+  const categories = [
+    { value: 'all', label: 'Semua Kategori' },
+    { value: 'Apparel', label: 'Apparel' },
+    { value: 'Accessories', label: 'Accessories' },
+    { value: 'Digital', label: 'Digital Products' },
+    { value: 'Stationery', label: 'Stationery' }
+  ];
+
+  const sortOptions = [
+    { value: 'newest', label: 'Terbaru' },
+    { value: 'price-low', label: 'Harga Terendah' },
+    { value: 'price-high', label: 'Harga Tertinggi' },
+    { value: 'rating', label: 'Rating Tertinggi' },
+    { value: 'popular', label: 'Terpopuler' }
+  ];
+
+  const filteredProducts = allProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'rating':
+        return b.rating - a.rating;
+      case 'popular':
+        return b.reviews - a.reviews;
+      default:
+        return 0;
+    }
   });
-
-  const handleAddToCart = (productId: number) => {
-    console.log('Added to cart:', productId);
-    // Here you would implement cart logic
-  };
-
-  const handleToggleWishlist = (productId: number) => {
-    console.log('Toggle wishlist:', productId);
-    // Here you would implement wishlist logic
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
-      {/* Page Hero */}
-      <section className="pt-24 pb-8 bg-white border-b">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Toko</h1>
-            <p className="text-gray-600 mt-2">Merchandise dan digital products eksklusif Gradien Unila.</p>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="container mx-auto px-4 py-10">
-        {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Cari produk..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <select 
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg"
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => onNavigate('home')}
+                className="flex items-center space-x-2"
               >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <Button variant="outline" className="flex items-center">
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
+                <ArrowLeft className="w-4 h-4" />
+                <span>Kembali</span>
               </Button>
-              <div className="flex border rounded-lg">
-                <Button
-                  onClick={() => setViewMode('grid')}
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-r-none"
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  onClick={() => setViewMode('list')}
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-l-none"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <span className="text-gradien-gradient">Gradien Unila</span> Store
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Merchandise & digital products untuk tech enthusiast
+                </p>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Categories */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                className={selectedCategory === category ? "bg-blue-600 hover:bg-blue-700" : ""}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </motion.div>
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-8">
+        {/* Search and Filter */}
+        <div className="mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Cari produk..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 lg:gap-3">
+                  <div className="w-full sm:w-48">
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger>
+                        <Filter className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="w-full sm:w-48">
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-        {/* Results count */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-6"
-        >
-          <p className="text-gray-600">
-            Menampilkan {filteredProducts.length} produk
-            {selectedCategory !== 'All' && ` dalam kategori ${selectedCategory}`}
-            {searchTerm && ` untuk "${searchTerm}"`}
-          </p>
-        </motion.div>
+                  <div className="flex border rounded-lg">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className="rounded-r-none"
+                    >
+                      <Grid className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="rounded-l-none"
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Menampilkan {filteredProducts.length} dari {allProducts.length} produk
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Products Grid/List */}
-        <div className={viewMode === 'grid' ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
+        {/* Products Grid */}
+        <div className={viewMode === 'grid' 
+          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+          : "grid gap-6"
+        }>
           {filteredProducts.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={viewMode === 'list' ? 'w-full' : ''}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               {viewMode === 'grid' ? (
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                  <div className="relative">
-                    <ImageWithFallback
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-red-500 text-white">
-                        {product.badge}
-                      </Badge>
-                    </div>
-                    {product.discount > 0 && (
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-green-500 text-white">
-                          -{product.discount}%
-                        </Badge>
-                      </div>
-                    )}
-                    <div className="absolute top-12 right-3">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleToggleWishlist(product.id)}
-                        className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-                      >
-                        <Heart className="w-4 h-4 text-gray-600" />
-                      </motion.button>
-                    </div>
-                    {!product.inStock && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Badge variant="secondary" className="bg-gray-700 text-white">
-                          Out of Stock
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm font-medium">{product.rating}</span>
-                        <span className="ml-1 text-xs text-gray-500">({product.reviews})</span>
-                      </div>
-                    </div>
-                    <h4 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {product.name}
-                    </h4>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold text-blue-600">
-                          Rp {product.price.toLocaleString()}
-                        </span>
-                        {product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through">
-                            Rp {product.originalPrice.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => handleAddToCart(product.id)}
-                      disabled={!product.inStock}
-                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                    </Button>
-                  </CardContent>
-                </Card>
+                <ProductCard product={product} />
               ) : (
-                <Card className="hover:shadow-lg transition-all duration-300">
-                  <div className="flex">
-                    <div className="relative w-48 h-48">
-                      <ImageWithFallback
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-red-500 text-white text-xs">
-                          {product.badge}
-                        </Badge>
-                      </div>
-                    </div>
-                    <CardContent className="flex-1 p-6">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h4>
-                          <Badge variant="outline" className="text-xs mb-2">
-                            {product.category}
-                          </Badge>
-                        </div>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleToggleWishlist(product.id)}
-                          className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                        >
-                          <Heart className="w-4 h-4 text-gray-600" />
-                        </motion.button>
-                      </div>
-                      <p className="text-gray-600 mb-4">{product.description}</p>
-                      <div className="flex items-center mb-4">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 font-medium">{product.rating}</span>
-                        <span className="ml-1 text-gray-500">({product.reviews} reviews)</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-2xl font-bold text-blue-600">
-                            Rp {product.price.toLocaleString()}
-                          </span>
-                          {product.originalPrice > product.price && (
-                            <span className="text-lg text-gray-500 line-through">
-                              Rp {product.originalPrice.toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                        <Button
-                          onClick={() => handleAddToCart(product.id)}
-                          disabled={!product.inStock}
-                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </div>
-                </Card>
+                <ProductListItem product={product} />
               )}
             </motion.div>
           ))}
         </div>
 
-        {/* No results */}
+        {/* No Results */}
         {filteredProducts.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center py-12"
-          >
-            <div className="text-gray-400 mb-4">
-              <Search className="w-16 h-16 mx-auto" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <div className="text-center py-16">
+            <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
               Tidak ada produk ditemukan
             </h3>
-            <p className="text-gray-600 mb-6">
-              Coba ubah kata kunci pencarian atau kategori
+            <p className="text-gray-500">
+              Coba ubah kata kunci pencarian atau filter kategori
             </p>
-            <Button onClick={() => { setSearchTerm(''); setSelectedCategory('All'); }}>
-              Reset Filter
-            </Button>
-          </motion.div>
+          </div>
         )}
 
         {/* Load More */}
         {filteredProducts.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-center mt-12"
-          >
-            <Button size="lg" variant="outline">
-              Load More Products
+          <div className="text-center mt-12">
+            <Button 
+              variant="outline"
+              size="lg"
+              className="border-[#0d7377] text-[#0d7377] hover:bg-[#e6f7f7]"
+            >
+              Muat Lebih Banyak Produk
             </Button>
-          </motion.div>
+          </div>
         )}
       </div>
-      <Footer />
     </div>
+  );
+}
+
+// Product Card Component
+function ProductCard({ product }: { product: any }) {
+  return (
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+      <div className="relative">
+        <ImageWithFallback
+          src={product.image}
+          alt={product.name}
+          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute top-3 left-3">
+          <Badge className="bg-red-500 text-white">
+            {product.badge}
+          </Badge>
+        </div>
+        <div className="absolute top-3 right-3">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+          >
+            <Heart className="w-4 h-4 text-gray-600" />
+          </motion.button>
+        </div>
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-[#0d7377] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#0a5d61] transition-colors"
+          >
+            Quick Add
+          </motion.button>
+        </div>
+      </div>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <Badge variant="outline" className="text-xs">
+            {product.category}
+          </Badge>
+          <div className="flex items-center">
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <span className="ml-1 text-sm font-medium">{product.rating}</span>
+            <span className="ml-1 text-xs text-gray-500">({product.reviews})</span>
+          </div>
+        </div>
+        <h3 className="font-bold text-gray-900 mb-2 group-hover:text-[#0d7377] transition-colors line-clamp-1">
+          {product.name}
+        </h3>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {product.description}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-lg font-bold text-[#0d7377]">
+              Rp {product.price.toLocaleString()}
+            </span>
+            {product.originalPrice && (
+              <span className="text-sm text-gray-500 line-through">
+                Rp {product.originalPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-8 h-8 bg-[#e6f7f7] hover:bg-[#b8f2f0] rounded-full flex items-center justify-center transition-colors"
+          >
+            <ShoppingCart className="w-4 h-4 text-[#0d7377]" />
+          </motion.button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Product List Item Component
+function ProductListItem({ product }: { product: any }) {
+  return (
+    <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+      <div className="grid md:grid-cols-4 gap-0">
+        {/* Image */}
+        <div className="relative md:col-span-1">
+          <ImageWithFallback
+            src={product.image}
+            alt={product.name}
+            className="w-full h-48 md:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-red-500 text-white text-xs">
+              {product.badge}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="md:col-span-3 p-4 flex justify-between">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <Badge variant="outline" className="text-xs">
+                {product.category}
+              </Badge>
+              <div className="flex items-center">
+                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                <span className="ml-1 text-sm font-medium">{product.rating}</span>
+                <span className="ml-1 text-xs text-gray-500">({product.reviews})</span>
+              </div>
+            </div>
+            
+            <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0d7377] transition-colors">
+              {product.name}
+            </h3>
+            
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {product.description}
+            </p>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-bold text-[#0d7377]">
+                  Rp {product.price.toLocaleString()}
+                </span>
+                {product.originalPrice && (
+                  <span className="text-sm text-gray-500 line-through">
+                    Rp {product.originalPrice.toLocaleString()}
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="w-8 h-8 bg-white border rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+                >
+                  <Heart className="w-4 h-4 text-gray-600" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-[#0d7377] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#0a5d61] transition-colors flex items-center"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Cart
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }
