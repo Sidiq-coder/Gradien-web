@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger 
 } from '../ui/dropdown-menu';
 import { useAuth } from '../../contexts/AuthContext';
-import gradienLogo from 'figma:asset/ae495aabe004ee9e291840853315a29e5347ac5a.png';
+import gradienLogo from '../../assets/ae495aabe004ee9e291840853315a29e5347ac5a.png';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -63,21 +63,36 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:fixed lg:inset-y-0
+        2xl:w-72
+        flex flex-col
       `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b">
+        <div className="flex items-center justify-between h-16 px-6 border-b shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => onNavigate('home')}
+              className="w-8 h-8 rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0d7377]"
+              title="Ke landing page"
+            >
               <img 
                 src={gradienLogo} 
                 alt="Gradien Unila" 
                 className="w-full h-full object-contain"
               />
-            </div>
+            </button>
             <div>
               <h2 className="font-bold text-gray-900">Gradien Unila</h2>
-              <p className="text-xs text-[#0d7377]">Dashboard</p>
+              <button
+                type="button"
+                onClick={() => { onNavigate('home'); setSidebarOpen(false); }}
+                className="text-xs text-[#0d7377] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0d7377] rounded-sm"
+                title="Ke landing page"
+              >
+                Home
+              </button>
             </div>
           </div>
           <button
@@ -88,7 +103,7 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="mt-4 px-3 flex-1 overflow-y-auto pb-24">
           <div className="space-y-1">
             {navigation.map((item) => (
               <button
@@ -112,7 +127,7 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
           </div>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-white">
           <div className="flex items-center space-x-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={user?.avatar} />
@@ -133,9 +148,9 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+  <div className="lg:pl-64 2xl:pl-72">
         {/* Top header */}
-        <header className="bg-white border-b h-16 flex items-center justify-between px-4 lg:px-6">
+  <header className="bg-white border-b h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
           <div className="flex items-center space-x-4">
             <button
               className="lg:hidden"
@@ -149,10 +164,19 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Cari..."
-                  className="pl-10 w-64"
+                  className="pl-10 w-48 md:w-64 lg:w-80 xl:w-96 2xl:w-[400px]"
                 />
               </div>
             </div>
+            {/* Tombol ke landing page */}
+            <Button
+              variant="outline"
+              size="default"
+              className="hidden md:inline-flex ml-2"
+              onClick={() => onNavigate('home')}
+            >
+              Ke Landing Page
+            </Button>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -162,7 +186,7 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} />
                     <AvatarFallback className="bg-[#0d7377] text-white">
@@ -181,6 +205,11 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
                   </div>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onNavigate('home')}>
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>Ke Landing Page</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => onPageChange('settings')}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Pengaturan</span>
@@ -196,7 +225,7 @@ export function DashboardLayout({ children, currentPage, onPageChange, onNavigat
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6">
+  <main className="flex-1 p-2 sm:p-4 lg:p-6 xl:p-8 2xl:p-10">
           <motion.div
             key={currentPage}
             initial={{ opacity: 0, y: 20 }}

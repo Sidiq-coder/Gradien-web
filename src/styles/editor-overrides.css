@@ -1,0 +1,43 @@
+/* Scoped overrides to align Editor.js content and plus button to the far left */
+.editorjs-left {
+  width: 100%;
+}
+.editorjs-left .ce-block,
+.editorjs-left .ce-block__content,
+.editorjs-left .ce-toolbar__content,
+.editorjs-left .cdx-block {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.editorjs-left .ce-block__content,
+.editorjs-left .ce-toolbar__content {
+  width: 100% !important;
+}
+.editorjs-left .codex-editor,
+.editorjs-left .codex-editor__redactor {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+.editorjs-left .ce-toolbar {
+  left: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.editorjs-left .ce-toolbar__plus {
+  left: 0 !important;
+  transform: none !important;
+}
+.editorjs-left .ce-block {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  justify-content: flex-start !important;
+}
+.editorjs-left .ce-paragraph,
+.editorjs-left .ce-header {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}

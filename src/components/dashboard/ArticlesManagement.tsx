@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Search, 
@@ -18,12 +18,8 @@ import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '../ui/dropdown-menu';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { 
   Table, 
   TableBody, 
@@ -32,20 +28,35 @@ import {
   TableHeader, 
   TableRow 
 } from '../ui/table';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useAuth } from '../../contexts/AuthContext';
+import type { OutputData } from '@editorjs/editorjs';
+
+interface ArticleItem {
+  id: number | string;
+  title: string;
+  excerpt: string;
+  author: string;
+  authorAvatar: string;
+  category: string;
+  status: 'published' | 'draft' | 'review';
+  publishDate: string;
+  views: number;
+  likes: number;
+  comments: number;
+  readTime: string;
+  featured: boolean;
+  content?: OutputData;
+  thumbnail?: string;
+}
 
 export function ArticlesManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const { user } = useAuth();
 
-  const articles = [
+  const initialArticles: ArticleItem[] = [
     {
       id: 1,
       title: 'Panduan Lengkap Menjadi Full Stack Developer di 2024',
@@ -123,6 +134,45 @@ export function ArticlesManagement() {
     }
   ];
 
+  const [articles, setArticles] = useState<ArticleItem[]>(initialArticles);
+
+  // Load artikel baru dari localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('gradien_new_articles');
+      if (raw) {
+        const extrasRaw: any[] = JSON.parse(raw);
+        const extras: ArticleItem[] = extrasRaw.map((a) => {
+          const plain = a.excerpt && a.excerpt.length > 0
+            ? a.excerpt
+            : (a.content ? extractPlainText(a.content) : '');
+          const words = plain ? plain.split(/\s+/).filter(Boolean).length : 0;
+          const minutes = Math.max(1, Math.round(words / 200));
+          return {
+            id: a.id ?? Date.now(),
+            title: a.title ?? 'Untitled',
+            excerpt: plain.slice(0, 160),
+            author: a.author || (user?.name || 'Admin'),
+            authorAvatar: a.authorAvatar || (user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'),
+            category: a.category ?? 'Frontend',
+            status: a.status ?? 'draft',
+            publishDate: a.publishDate ?? new Date().toISOString().slice(0, 10),
+            views: a.views ?? 0,
+            likes: a.likes ?? 0,
+            comments: a.comments ?? 0,
+            readTime: a.readTime ?? `${minutes} min`,
+            featured: a.featured ?? false,
+            content: a.content,
+            thumbnail: a.thumbnail,
+          } as ArticleItem;
+        });
+        setArticles([...extras, ...initialArticles]);
+      }
+    } catch (e) {
+      console.error('Failed to load new articles:', e);
+    }
+  }, [user]);
+
   const filteredArticles = articles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          article.author.toLowerCase().includes(searchTerm.toLowerCase());
@@ -157,6 +207,11 @@ export function ArticlesManagement() {
     return colors[category] || 'bg-gray-100 text-gray-700';
   };
 
+  // Navigasi ke halaman tulis artikel baru
+  const goToAddArticle = () => {
+    window.location.hash = 'add-article';
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -167,7 +222,7 @@ export function ArticlesManagement() {
             Kelola konten artikel untuk komunitas Gradien Unila
           </p>
         </div>
-        <Button className="bg-[#0d7377] hover:bg-[#0a5d61] text-white">
+        <Button onClick={goToAddArticle} className="bg-[#0d7377] hover:bg-[#0a5d61] text-white">
           <Plus className="w-4 h-4 mr-2" />
           Tulis Artikel
         </Button>
@@ -382,3 +437,39 @@ export function ArticlesManagement() {
     </div>
   );
 }
+
+// Util: ekstrak plain text dari OutputData Editor.js
+function extractPlainText(output: OutputData): string {
+  if (!output || !Array.isArray(output.blocks)) return '';
+  const parts: string[] = [];
+  for (const block of output.blocks as any[]) {
+    if (!block) continue;
+    switch (block.type) {
+      case 'paragraph':
+        parts.push((block.data?.text ?? '').replace(/<[^>]+>/g, ''));
+        break;
+      case 'header':
+        parts.push((block.data?.text ?? '').replace(/<[^>]+>/g, ''));
+        break;
+      case 'list':
+        if (Array.isArray(block.data?.items)) {
+          for (const item of block.data.items) {
+            parts.push(String(item).replace(/<[^>]+>/g, ''));
+          }
+        }
+        break;
+      case 'checklist':
+        if (Array.isArray(block.data?.items)) {
+          for (const item of block.data.items) {
+            parts.push(String(item?.text ?? '').replace(/<[^>]+>/g, ''));
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// Catatan: Dialog pembuatan artikel dipindahkan ke halaman terpisah (pages/AddArticle.tsx)

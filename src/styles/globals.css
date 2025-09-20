@@ -232,3 +232,41 @@ html {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Editor.js layout fixes: align left and remove centered max width */
+.editorjs {
+  /* Ensure container spans full width of form area */
+  width: 100%;
+}
+.editorjs .ce-block,
+.editorjs .ce-toolbar__content,
+.editorjs .ce-block__content {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.editorjs .cdx-block {
+  max-width: none !important;
+}
+.editorjs .ce-toolbar__content {
+  /* Keep toolbar aligned with content start */
+  padding-left: 0 !important;
+}
+.editorjs .codex-editor__redactor {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Ensure the inline plus button and toolbar start at far left */
+.editorjs .ce-toolbar {
+  left: 0 !important;
+  margin-left: 0 !important;
+}
+.editorjs .ce-toolbar__plus {
+  left: 0 !important;
+  transform: none !important;
+}
+.editorjs .ce-block {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}

@@ -17,10 +17,11 @@ import { MembersManagement } from './components/dashboard/MembersManagement';
 import { ArticlesManagement } from './components/dashboard/ArticlesManagement';
 import { EcommerceManagement } from './components/dashboard/EcommerceManagement';
 import { ArticlesPage } from './pages/Articles';
+import { AddArticlePage } from './pages/AddArticle';
 import { ShopPage } from './pages/Shop';
 import { Toaster } from './components/ui/sonner';
 
-type Page = 'home' | 'login' | 'register' | 'dashboard' | 'articles' | 'shop';
+type Page = 'home' | 'login' | 'register' | 'dashboard' | 'articles' | 'shop' | 'add-article';
 type DashboardPage = 'overview' | 'members' | 'articles' | 'ecommerce' | 'settings';
 
 function AppContent() {
@@ -51,7 +52,7 @@ function AppContent() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (['home', 'login', 'register', 'dashboard', 'articles', 'shop'].includes(hash)) {
+      if (['home', 'login', 'register', 'dashboard', 'articles', 'shop', 'add-article'].includes(hash)) {
         setCurrentPage(hash as Page);
       } else if (!hash) {
         setCurrentPage('home');
@@ -149,6 +150,39 @@ function AppContent() {
             {renderDashboardContent()}
           </DashboardLayout>
         );
+      case 'add-article':
+        // Pastikan hanya user login yang bisa akses
+        if (!isAuthenticated) {
+          navigateTo('login');
+          return null;
+        }
+        return (
+          <AddArticlePage
+            onBack={() => window.history.back()}
+            onSave={(article) => {
+              try {
+                const raw = localStorage.getItem('gradien_new_articles');
+                const list = raw ? JSON.parse(raw) : [];
+                const withId = {
+                  id: Date.now(),
+                  title: article.title,
+                  category: article.category,
+                  status: article.status,
+                  thumbnail: article.thumbnail,
+                  content: article.content,
+                  excerpt: '',
+                };
+                list.unshift(withId);
+                localStorage.setItem('gradien_new_articles', JSON.stringify(list));
+              } catch (e) {
+                console.error('Failed saving article:', e);
+              }
+              // Kembali ke dashboard dan tab articles
+              window.location.hash = 'dashboard';
+              setDashboardPage('articles');
+            }}
+          />
+        );
       case 'articles':
         return <ArticlesPage onNavigate={navigateTo} />;
       case 'shop':
@@ -174,8 +208,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Show header for all pages except login/register/dashboard */}
-      {!['login', 'register', 'dashboard'].includes(currentPage) && (
+      {/* Show header for all pages except login/register/dashboard/add-article */}
+      {!['login', 'register', 'dashboard', 'add-article'].includes(currentPage) && (
         <Header currentPage={currentPage} onNavigate={navigateTo} />
       )}
       {renderPage()}
